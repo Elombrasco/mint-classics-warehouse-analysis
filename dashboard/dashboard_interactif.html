@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mint Classics — Warehouse Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --border: #252830;
+    --accent: #e8ff47;
+    --accent2: #ff6b47;
+    --accent3: #47b4ff;
+    --text: #f0f0f0;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; padding: 24px; }
+  header { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .logo { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .badge-close { background: var(--accent); color: #000; font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace; padding: 4px 12px; border-radius: 2px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; position: relative; overflow: hidden; }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, var(--accent)); }
+  .kpi-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+  .card-title { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .card-heading { font-size: 15px; font-weight: 700; margin-bottom: 18px; color: var(--text); }
+  canvas { max-height: 220px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab-btn { font-size: 11px; font-family: 'DM Mono', monospace; padding: 5px 14px; border-radius: 3px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; letter-spacing: 0.06em; }
+  .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  .ratio-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .ratio-row:last-child { border-bottom: none; }
+  .ratio-name { flex: 1; color: var(--text); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ratio-bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; }
+  .ratio-bar { height: 4px; border-radius: 2px; background: var(--accent2); }
+  .ratio-val { width: 36px; text-align: right; color: var(--accent); font-weight: 500; font-size: 11px; }
+  .warning-tag { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; padding: 2px 6px; border-radius: 2px; background: rgba(255,107,71,0.15); color: var(--accent2); margin-left: 4px; }
+  .ok-tag { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; padding: 2px 6px; border-radius: 2px; background: rgba(232,255,71,0.12); color: var(--accent); margin-left: 4px; }
+  .insight-box { background: rgba(232,255,71,0.06); border: 1px solid rgba(232,255,71,0.2); border-radius: 6px; padding: 14px 16px; font-size: 12px; line-height: 1.7; color: #c8c8c8; font-family: 'DM Mono', monospace; }
+  .insight-box strong { color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">Mint Classics Co. — Analyse Inventaire</div>
+    <h1>Warehouse <span>Intelligence</span></h1>
+    <div class="subtitle">Données extraites via SQL — MySQL Workbench</div>
+  </div>
+  <div class="badge-close">→ Fermer entrepôt D</div>
+</header>
+
+<div class="kpi-row">
+  <div class="kpi" style="--accent-color: var(--accent)">
+    <div class="kpi-label">Entrepôts actifs</div>
+    <div class="kpi-value">4</div>
+    <div class="kpi-sub">A · B · C · D</div>
+  </div>
+  <div class="kpi" style="--accent-color: var(--accent3)">
+    <div class="kpi-label">Stock total</div>
+    <div class="kpi-value">555K</div>
+    <div class="kpi-sub">555 131 unités</div>
+  </div>
+  <div class="kpi" style="--accent-color: var(--accent2)">
+    <div class="kpi-label">Stock entrepôt D</div>
+    <div class="kpi-value">79K</div>
+    <div class="kpi-sub">14% du total</div>
+  </div>
+  <div class="kpi" style="--accent-color: #a855f7">
+    <div class="kpi-label">Espace libre A+B+C</div>
+    <div class="kpi-value">284K</div>
+    <div class="kpi-sub">3.5× le stock de D</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Répartition du stock</div>
+    <div class="card-heading">Stock par entrepôt</div>
+    <canvas id="stockChart"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-title">Capacité disponible après fermeture de D</div>
+    <div class="card-heading">Espace libre dans A · B · C</div>
+    <canvas id="capacityChart"></canvas>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Entrepôt D — Analyse produits</div>
+  <div class="card-heading">Ratio Stock / Ventes <span style="font-size:12px;color:var(--muted);font-weight:400">(ratio > 1 = surstock)</span></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('top', event)">Top surstockés</button>
+    <button class="tab-btn" onclick="switchTab('tension', event)">En tension</button>
+    <button class="tab-btn" onclick="switchTab('all', event)">Tous les produits</button>
+  </div>
+  <div class="tab-content active" id="tab-top"><div id="ratio-top"></div></div>
+  <div class="tab-content" id="tab-tension"><div id="ratio-tension"></div></div>
+  <div class="tab-content" id="tab-all"><canvas id="ratioChart" style="max-height:280px"></canvas></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Commandes ouvertes — Entrepôt D</div>
+    <div class="card-heading">Stock disponible après livraison</div>
+    <canvas id="ordersChart"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-title">Synthèse analytique</div>
+    <div class="card-heading">Points clés</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="insight-box"><strong>✓ Faisabilité confirmée</strong><br>A+B+C ont 284 048 unités d'espace libre — 3.5× le stock de D (79 380).</div>
+      <div class="insight-box"><strong>⚠ Priorité avant déménagement</strong><br>Pont Yacht (306 u.) et The Mayflower (630 u.) ont les stocks les plus bas après commandes ouvertes.</div>
+      <div class="insight-box"><strong>✗ Produit mort détecté</strong><br>1985 Toyota Supra — 7 733 unités en stock, 0 vente historique. Candidate à la suppression.</div>
+      <div class="insight-box"><strong>↓ Réduire les réapprovisionnements</strong><br>6 produits avec ratio > 5 (Chicago Streetcar à 9.21). Stopper les commandes fournisseurs.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ACCENT='#e8ff47',ACCENT2='#ff6b47',ACCENT3='#47b4ff',BORDER='#252830',MUTED='#6b7280';
+Chart.defaults.color='#6b7280';
+Chart.defaults.borderColor='#252830';
+Chart.defaults.font.family='DM Mono, monospace';
+Chart.defaults.font.size=11;
+
+new Chart(document.getElementById('stockChart'),{type:'bar',data:{labels:['D — South','C — West','A — North','B — East'],datasets:[{data:[79380,124880,131688,219183],backgroundColor:[ACCENT2,ACCENT3,ACCENT3,ACCENT3],borderRadius:3,borderSkipped:false}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw.toLocaleString('fr')} unités`}}},scales:{x:{grid:{color:BORDER}},y:{grid:{color:BORDER},ticks:{callback:v=>(v/1000)+'K'}}},responsive:true,maintainAspectRatio:true}});
+
+new Chart(document.getElementById('capacityChart'),{type:'bar',data:{labels:['A — North','B — East','C — West'],datasets:[{label:'Stock actuel',data:[131688,219183,124880],backgroundColor:ACCENT3,borderRadius:3,borderSkipped:false},{label:'Espace libre',data:[51212,107956,124880],backgroundColor:ACCENT,borderRadius:3,borderSkipped:false}]},options:{plugins:{legend:{labels:{color:'#9ca3af',boxWidth:10,boxHeight:10}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('fr')} u.`}}},scales:{x:{stacked:true,grid:{color:BORDER}},y:{stacked:true,grid:{color:BORDER},ticks:{callback:v=>(v/1000)+'K'}}},responsive:true,maintainAspectRatio:true}});
+
+const ratioData=[{name:"Chicago Streetcar",ratio:9.21},{name:"1964 Mercedes Bus",ratio:7.84},{name:"Collectable Wooden Train",ratio:7.03},{name:"USS Constitution",ratio:6.94},{name:"1957 Chevy Pickup",ratio:5.80},{name:"The Queen Mary",ratio:5.68},{name:"GM Manhattan Express",ratio:5.60},{name:"1999 Yamaha Speed Boat",ratio:4.41},{name:"HMS Bounty",ratio:3.90},{name:"1954 Greyhound",ratio:3.01},{name:"1940s Ford truck",ratio:2.95},{name:"1940 Ford Pickup",ratio:2.62},{name:"VW Microbus 1962",ratio:2.26},{name:"The Titanic",ratio:2.05},{name:"Schooner Bluenose",ratio:2.03},{name:"1926 Ford Fire Engine",ratio:2.02},{name:"18th century schooner",ratio:1.88},{name:"Detroit Streetcar 1962",ratio:1.70},{name:"1958 Setra Bus",ratio:1.62},{name:"Diamond T620 Tanker",ratio:1.04},{name:"1996 Peterbilt 379",ratio:0.82},{name:"The Mayflower",ratio:0.82},{name:"Pont Yacht",ratio:0.43}];
+
+function makeRatioRow(d){const pct=Math.min((d.ratio/9.21)*100,100);const tension=d.ratio<1;const tag=tension?`<span class="warning-tag">TENSION</span>`:d.ratio>5?`<span class="warning-tag">SURSTOCK</span>`:`<span class="ok-tag">OK</span>`;return`<div class="ratio-row"><div class="ratio-name">${d.name}${tag}</div><div class="ratio-bar-bg"><div class="ratio-bar" style="width:${pct}%;background:${tension?ACCENT2:d.ratio>5?'#ff3333':ACCENT3}"></div></div><div class="ratio-val">${d.ratio}</div></div>`;}
+
+document.getElementById('ratio-top').innerHTML=ratioData.filter(d=>d.ratio>=5).map(makeRatioRow).join('');
+document.getElementById('ratio-tension').innerHTML=ratioData.filter(d=>d.ratio<1).map(makeRatioRow).join('');
+
+new Chart(document.getElementById('ratioChart'),{type:'bar',data:{labels:ratioData.map(d=>d.name),datasets:[{data:ratioData.map(d=>d.ratio),backgroundColor:ratioData.map(d=>d.ratio<1?ACCENT2:d.ratio>5?'#ff3333':ACCENT3),borderRadius:2}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:BORDER}},y:{grid:{display:false},ticks:{font:{size:10}}}},responsive:true,maintainAspectRatio:false}});
+
+const ordersData=[{name:"Pont Yacht",stock:108,remaining:306},{name:"The Mayflower",stock:107,remaining:630},{name:"Detroit Streetcar",stock:21,remaining:1624},{name:"18th c. Schooner",stock:124,remaining:1774},{name:"Schooner Bluenose",stock:116,remaining:1781},{name:"The Titanic",stock:82,remaining:1874},{name:"Ford Fire Engine",stock:34,remaining:1984},{name:"VW Microbus",stock:42,remaining:2285}];
+
+new Chart(document.getElementById('ordersChart'),{type:'bar',data:{labels:ordersData.map(d=>d.name),datasets:[{label:'En commande',data:ordersData.map(d=>d.stock),backgroundColor:ACCENT2,borderRadius:2},{label:'Restant après livraison',data:ordersData.map(d=>d.remaining),backgroundColor:ACCENT,borderRadius:2}]},options:{plugins:{legend:{labels:{color:'#9ca3af',boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}},y:{grid:{color:BORDER}}},responsive:true,maintainAspectRatio:true}});
+
+function switchTab(name,event){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));event.currentTarget.classList.add('active');document.getElementById('tab-'+name).classList.add('active');}
+</script>
+</body>
+</html>
