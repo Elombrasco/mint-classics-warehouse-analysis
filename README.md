@@ -35,8 +35,7 @@ maintenant un délai de livraison de 24h pour tous les clients.
 Dashboard interactif Tableau :
 [Voir sur Tableau Public](https://public.tableau.com/app/profile/frejus.ibatta.obesse/viz/MintClassicsAnalyseInventaireEntreptD/Dashboard1)
 
-- **HTML/CSS/Chart.js** — dashboard interactif (`dashboard/dashboard_interactif.html`)
-
+HTML/Chart.js → "Dashboard technique — Chart.js: https://elombrasco.github.io/mint-classics-warehouse-analysis/dashboard/dashboard_interactif.html 
 ## Outils Utilisés
 - **MySQL Workbench** — exploration des données et requêtes SQL
 - **Tableau Public** — visualisation des données
