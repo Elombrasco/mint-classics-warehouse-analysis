@@ -31,9 +31,11 @@ maintenant un délai de livraison de 24h pour tous les clients.
 | `queries/03_warehouse_d_ratios.sql` | Ratio stock/ventes des produits de l'entrepôt D |
 | `queries/04_open_orders_d.sql` | Vérification des commandes en cours avant fermeture |
 
-## Dashboard
+## Dashboards
 Dashboard interactif Tableau :
 [Voir sur Tableau Public](https://public.tableau.com/app/profile/frejus.ibatta.obesse/viz/MintClassicsAnalyseInventaireEntreptD/Dashboard1)
+
+- **HTML/CSS/Chart.js** — dashboard interactif (`dashboard/dashboard_interactif.html`)
 
 ## Outils Utilisés
 - **MySQL Workbench** — exploration des données et requêtes SQL
